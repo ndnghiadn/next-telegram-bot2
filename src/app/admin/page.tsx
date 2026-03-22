@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import styles from "./admin.module.css";
 
 type WebhookInfo = {
@@ -11,7 +11,11 @@ type WebhookInfo = {
   last_error_message?: string;
 };
 
-type Log = { time: string; type: "info" | "success" | "error" | "warn"; msg: string };
+type Log = {
+  time: string;
+  type: "info" | "success" | "error" | "warn";
+  msg: string;
+};
 
 function timestamp() {
   return new Date().toLocaleTimeString("vi-VN", { hour12: false });
@@ -27,7 +31,9 @@ export default function AdminPage() {
   const [logs, setLogs] = useState<Log[]>([]);
   const [broadcast, setBroadcast] = useState("");
   const [chatIds, setChatIds] = useState("");
-  const [activeTab, setActiveTab] = useState<"webhook" | "broadcast" | "send">("webhook");
+  const [activeTab, setActiveTab] = useState<"webhook" | "broadcast" | "send">(
+    "webhook",
+  );
   const [sendTo, setSendTo] = useState("");
   const [sendMsg, setSendMsg] = useState("");
 
@@ -36,8 +42,11 @@ export default function AdminPage() {
   }, []);
 
   const headers = useCallback(
-    () => ({ "Content-Type": "application/json", "x-admin-password": password }),
-    [password]
+    () => ({
+      "Content-Type": "application/json",
+      "x-admin-password": password,
+    }),
+    [password],
   );
 
   const fetchWebhook = useCallback(async () => {
@@ -51,7 +60,7 @@ export default function AdminPage() {
       } else {
         log(data.error || "Failed to fetch webhook info", "error");
       }
-    } catch (e) {
+    } catch {
       log("Network error", "error");
     } finally {
       setLoading((l) => ({ ...l, webhook: false }));
@@ -62,7 +71,10 @@ export default function AdminPage() {
     setLoading((l) => ({ ...l, set: true }));
     log("Setting webhook...", "info");
     try {
-      const res = await fetch("/api/bot/setup", { method: "POST", headers: headers() });
+      const res = await fetch("/api/bot/setup", {
+        method: "POST",
+        headers: headers(),
+      });
       const data = await res.json();
       if (data.ok) {
         log(`Webhook set → ${data.webhook_url}`, "success");
@@ -81,7 +93,10 @@ export default function AdminPage() {
     setLoading((l) => ({ ...l, delete: true }));
     log("Deleting webhook...", "warn");
     try {
-      const res = await fetch("/api/bot/setup", { method: "DELETE", headers: headers() });
+      const res = await fetch("/api/bot/setup", {
+        method: "DELETE",
+        headers: headers(),
+      });
       const data = await res.json();
       if (data.ok) {
         log("Webhook deleted", "success");
@@ -97,7 +112,10 @@ export default function AdminPage() {
   };
 
   const sendBroadcast = async () => {
-    const ids = chatIds.split(",").map((s) => s.trim()).filter(Boolean);
+    const ids = chatIds
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
     if (!ids.length || !broadcast) {
       log("Cần nhập Chat IDs và nội dung tin nhắn", "warn");
       return;
@@ -191,7 +209,11 @@ export default function AdminPage() {
               autoFocus
             />
             {authError && <span className={styles.error}>{authError}</span>}
-            <button type="submit" className={styles.btn} disabled={loading.login}>
+            <button
+              type="submit"
+              className={styles.btn}
+              disabled={loading.login}
+            >
               {loading.login ? "checking..." : "→ login"}
             </button>
           </form>
@@ -210,7 +232,9 @@ export default function AdminPage() {
           <span className={styles.headerBadge}>● LIVE</span>
         </div>
         <div className={styles.headerRight}>
-          <span className={styles.text2}>{new Date().toLocaleDateString("vi-VN")}</span>
+          <span className={styles.text2}>
+            {new Date().toLocaleDateString("vi-VN")}
+          </span>
         </div>
       </header>
 
@@ -227,7 +251,11 @@ export default function AdminPage() {
                 <span className={styles.navIcon}>
                   {tab === "webhook" ? "◈" : tab === "broadcast" ? "◎" : "◆"}
                 </span>
-                {tab === "webhook" ? "Webhook" : tab === "broadcast" ? "Broadcast" : "Direct Send"}
+                {tab === "webhook"
+                  ? "Webhook"
+                  : tab === "broadcast"
+                    ? "Broadcast"
+                    : "Direct Send"}
               </button>
             ))}
           </nav>
@@ -237,10 +265,11 @@ export default function AdminPage() {
             <div className={styles.statusLabel}>WEBHOOK</div>
             <div
               className={styles.statusDot}
-              style={{ color: webhookInfo?.url ? "var(--green)" : "var(--red)" }}
+              style={{
+                color: webhookInfo?.url ? "var(--green)" : "var(--red)",
+              }}
             >
-              ●{" "}
-              {webhookInfo?.url ? "ACTIVE" : "INACTIVE"}
+              ● {webhookInfo?.url ? "ACTIVE" : "INACTIVE"}
             </div>
             {webhookInfo?.pending_update_count !== undefined && (
               <div className={styles.statusSub}>
@@ -266,7 +295,10 @@ export default function AdminPage() {
                 <div className={styles.infoGrid}>
                   <div className={styles.infoItem}>
                     <span className={styles.infoLabel}>URL</span>
-                    <span className={styles.infoValue} style={{ wordBreak: "break-all" }}>
+                    <span
+                      className={styles.infoValue}
+                      style={{ wordBreak: "break-all" }}
+                    >
                       {webhookInfo.url || "—"}
                     </span>
                   </div>
@@ -278,10 +310,16 @@ export default function AdminPage() {
                   </div>
                   {webhookInfo.last_error_message && (
                     <div className={styles.infoItem}>
-                      <span className={styles.infoLabel} style={{ color: "var(--red)" }}>
+                      <span
+                        className={styles.infoLabel}
+                        style={{ color: "var(--red)" }}
+                      >
                         LAST ERROR
                       </span>
-                      <span className={styles.infoValue} style={{ color: "var(--red)" }}>
+                      <span
+                        className={styles.infoValue}
+                        style={{ color: "var(--red)" }}
+                      >
                         {webhookInfo.last_error_message}
                       </span>
                     </div>
@@ -318,8 +356,12 @@ export default function AdminPage() {
                 <ol className={styles.hintList}>
                   <li>Push code lên GitHub</li>
                   <li>Connect repo với Vercel</li>
-                  <li>Thêm các biến môi trường từ <code>.env.example</code></li>
-                  <li>Deploy xong → bấm <strong>set webhook</strong> ở trên</li>
+                  <li>
+                    Thêm các biến môi trường từ <code>.env.example</code>
+                  </li>
+                  <li>
+                    Deploy xong → bấm <strong>set webhook</strong> ở trên
+                  </li>
                   <li>Test bot bằng cách nhắn /start</li>
                 </ol>
               </div>
@@ -331,10 +373,14 @@ export default function AdminPage() {
             <div className={styles.panel}>
               <div className={styles.panelHeader}>
                 <h2>Broadcast</h2>
-                <span className={styles.panelSub}>Gửi tin nhắn đến nhiều users</span>
+                <span className={styles.panelSub}>
+                  Gửi tin nhắn đến nhiều users
+                </span>
               </div>
               <div className={styles.formGroup}>
-                <label className={styles.label}>CHAT IDs (cách nhau bằng dấu phẩy)</label>
+                <label className={styles.label}>
+                  CHAT IDs (cách nhau bằng dấu phẩy)
+                </label>
                 <input
                   className={styles.input}
                   value={chatIds}
@@ -367,7 +413,9 @@ export default function AdminPage() {
             <div className={styles.panel}>
               <div className={styles.panelHeader}>
                 <h2>Direct Send</h2>
-                <span className={styles.panelSub}>Gửi tin nhắn đến 1 user cụ thể</span>
+                <span className={styles.panelSub}>
+                  Gửi tin nhắn đến 1 user cụ thể
+                </span>
               </div>
               <div className={styles.formGroup}>
                 <label className={styles.label}>CHAT ID</label>
@@ -409,10 +457,13 @@ export default function AdminPage() {
           </div>
           <div className={styles.logBody}>
             {logs.length === 0 && (
-              <div className={styles.logEmpty}>// no logs yet</div>
+              <div className={styles.logEmpty}>{"// no logs yet"}</div>
             )}
             {logs.map((l, i) => (
-              <div key={i} className={`${styles.logLine} ${styles[`log_${l.type}`]}`}>
+              <div
+                key={i}
+                className={`${styles.logLine} ${styles[`log_${l.type}`]}`}
+              >
                 <span className={styles.logTime}>{l.time}</span>
                 <span>{l.msg}</span>
               </div>
